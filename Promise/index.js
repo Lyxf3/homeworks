@@ -63,4 +63,57 @@ event loop в стек засунет [Promise, setTimeout] и вроде дол
 но setTimeout это макрозадача, а Promise микрозадача. event loop в первую очередь делает все микрозадачи
 */
 
-//Пятое задание очень крутое, я не знал что есть такое разделение :)
+//sleep
+function sleep(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+}
+
+sleep(200).then(() => {
+    console.log('Я проснулся!');
+});
+
+//rejectAfterSleep
+
+function rejectAfterSleep(ms, error) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => reject(error), ms)
+    })
+}
+
+rejectAfterSleep(200, 'boom!').catch((err) => {
+    console.log(err);
+});
+
+//timeout
+
+function timeout(promise, ms) {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(() => reject(new Error('Timeout')), ms)
+        })
+    ])
+}
+
+timeout(fetch('url'), 500).then(console.log, console.log);
+
+//all
+function all(promises = []) {
+    return promises.reduce( (acc, cur) => {
+        return acc
+            .then(all => Promise.resolve(cur).then(promise => [ ...all, promise ]))
+    }, Promise.resolve([]))
+}
+
+//allSettled
+function allSettled(promises) {
+    let result = promises.map(p => {
+            return Promise.resolve(p)
+                .then(val => ({ status: 'fulfilled', value: val }))
+                .catch(err => ({ status: 'rejected', reason: err }))
+        }
+    )
+    return all(result)
+}
