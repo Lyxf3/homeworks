@@ -117,3 +117,39 @@ function allSettled(promises) {
     )
     return all(result)
 }
+
+//race
+function race(promises) {
+    return new Promise((resolve, reject) => {
+        promises.forEach(e =>
+            Promise.resolve(e)
+            .then(value => resolve(value))
+            .catch(error => reject(error)))
+    })
+}
+
+//once 
+function once(element, event) {
+    return new Promise(resolve => {
+        element.addEventListener(event, (eventObject) => {
+            resolve(eventObject)
+        })
+    })
+}
+
+//promisify
+const fs = required("fs")
+function openFile(file, cb) {
+    fs.readFile(file, cb);
+}
+
+const openFilePromise = promisify(openFile);
+
+openFilePromise('foo.txt').then(
+    console.log,
+    console.error
+);
+
+function promisify() {
+    
+}
