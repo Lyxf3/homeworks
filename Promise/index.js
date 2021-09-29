@@ -104,18 +104,19 @@ function all(promises ) {
     return new Promise((resolve, reject) => {
         resolve(
             Array.from(promises).reduce( (acc, cur) => {
-            return acc.then(all => Promise.resolve(cur)
-                .then(promise => [...all, promise])
-                .catch(error => console.log(error))
+                return acc.then(all => Promise.resolve(cur)
+                    .then(promise => [...all, promise])
+                    .catch(error => reject(error))
                 )
             }, Promise.resolve([]))
         )
     })
 }
 
+
 //allSettled
 function allSettled(promises) {
-    let result =  Array.from(promises).map(p => {
+    let result = Array.from(promises).map(p => {
             return Promise.resolve(p)
                 .then(val => ({ status: 'fulfilled', value: val }))
                 .catch(err => ({ status: 'rejected', reason: err }))
@@ -144,7 +145,7 @@ function once(element, event) {
 }
 
 
-// //promisify
+// //promisify TODO
 // const fs = required("fs")
 // function openFile(file, cb) {
 //     fs.readFile(file, cb);
@@ -161,3 +162,7 @@ function once(element, event) {
 //     console.error
 // );
 
+//allLimit
+function allLimit(promises, limit) {
+
+}
