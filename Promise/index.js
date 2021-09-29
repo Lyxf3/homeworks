@@ -100,16 +100,22 @@ function timeout(promise, ms) {
 timeout(fetch('url'), 500).then(console.log, console.log);
 
 //all
-function all(promises = []) {
-    return promises.reduce( (acc, cur) => {
-        return acc
-            .then(all => Promise.resolve(cur).then(promise => [ ...all, promise ]))
-    }, Promise.resolve([]))
+function all(promises ) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            Array.from(promises).reduce( (acc, cur) => {
+            return acc.then(all => Promise.resolve(cur)
+                .then(promise => [...all, promise])
+                .catch(error => console.log(error))
+                )
+            }, Promise.resolve([]))
+        )
+    })
 }
 
 //allSettled
 function allSettled(promises) {
-    let result = promises.map(p => {
+    let result =  Array.from(promises).map(p => {
             return Promise.resolve(p)
                 .then(val => ({ status: 'fulfilled', value: val }))
                 .catch(err => ({ status: 'rejected', reason: err }))
@@ -121,7 +127,7 @@ function allSettled(promises) {
 //race
 function race(promises) {
     return new Promise((resolve, reject) => {
-        promises.forEach(e =>
+        Array.from(promises).forEach(e =>
             Promise.resolve(e)
             .then(value => resolve(value))
             .catch(error => reject(error)))
@@ -133,23 +139,25 @@ function once(element, event) {
     return new Promise(resolve => {
         element.addEventListener(event, (eventObject) => {
             resolve(eventObject)
-        })
+        }, {once: true})
     })
 }
 
-//promisify
-const fs = required("fs")
-function openFile(file, cb) {
-    fs.readFile(file, cb);
-}
 
-const openFilePromise = promisify(openFile);
+// //promisify
+// const fs = required("fs")
+// function openFile(file, cb) {
+//     fs.readFile(file, cb);
+// }
+//
+// function promisify() {
+//
+// }
+//
+// const openFilePromise = promisify(openFile);
+//
+// openFilePromise('foo.txt').then(
+//     console.log,
+//     console.error
+// );
 
-openFilePromise('foo.txt').then(
-    console.log,
-    console.error
-);
-
-function promisify() {
-    
-}
