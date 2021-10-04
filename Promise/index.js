@@ -100,7 +100,7 @@ function timeout(promise, ms) {
 timeout(fetch('url'), 500).then(console.log, console.log);
 
 //all
-function all(promises ) {
+function all(promises) {
     return new Promise((resolve, reject) => {
         resolve(
             Array.from(promises).reduce( (acc, cur) => {
@@ -145,24 +145,72 @@ function once(element, event) {
 }
 
 
-// //promisify TODO
-// const fs = required("fs")
-// function openFile(file, cb) {
-//     fs.readFile(file, cb);
-// }
-//
-// function promisify() {
-//
-// }
-//
-// const openFilePromise = promisify(openFile);
-//
-// openFilePromise('foo.txt').then(
-//     console.log,
-//     console.error
-// );
-
-//allLimit
-function allLimit(promises, limit) {
-
+//promisify
+function openFile(file, cb) {
+    fs.readFile(file, cb);
 }
+
+function promisify(file) {
+    return new Promise((resolve, reject) => {
+        openFile(file, (err, script) => {
+            if (err) reject(err)
+            else resolve(script);
+        });
+    })
+}
+
+const openFilePromise = promisify(openFile);
+
+openFilePromise('foo.txt').then(
+    console.log,
+    console.error
+);
+
+
+//allLimit TODO
+
+
+//abortablePromise
+const controller = new AbortController()
+
+function abortablePromise(promise, controller) {
+    const {aborted} = controller
+    console.log(aborted)
+    if (aborted) {
+        return Promise.reject(new Error('AbortError'));
+    }
+    return new Promise(resolve => {
+        resolve(promise)
+
+        controller.addEventListener('abort', () => {
+            //Почему тут не работает просто reject ?
+            return Promise.reject(Error('AbortError'))
+        }, {once: true})
+    });
+}
+
+abortablePromise(new Promise(resolve =>
+    setTimeout(resolve, 2000, "Test")), controller.signal)
+    .then(console.log)
+    .catch(console.error)
+
+controller.abort()
+
+
+// //nonNullable
+// function nonNullable(func) {
+//
+// }
+//
+// function sum(a, b) {
+//     return a + b;
+// }
+//
+// function prod(a, b) {
+//     return a * b;
+// }
+//
+// const sum2 = nonNullable(sum);
+// const prod2 = nonNullable(prod);
+//
+// prod2(10, null).then(sum2).catch(console.error);
